@@ -7,12 +7,14 @@ import (
 
 	"github.com/gorilla/mux"
 
-	// Route handlers below
+	// route handler packages below
 	"github.com/coding-CEO/go-backend-test/routeHandlers/homeHandler"
 )
 
 func main() {
 	router := mux.NewRouter();
+
+	// route handlers below
 	router.HandleFunc("/", homeHandler.HomeHandler)
     
 	// start the server
