@@ -1,7 +1,22 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
+
+	// Route handlers below
+	"github.com/coding-CEO/go-backend-test/routeHandlers/homeHandler"
+)
 
 func main() {
-	fmt.Println("Hello World !")
+	router := mux.NewRouter();
+	router.HandleFunc("/", homeHandler.HomeHandler)
+    
+	// start the server
+	fmt.Println("Server is Listening on port 4000")
+	log.Fatal(http.ListenAndServe(":4000", router))
 }
+
