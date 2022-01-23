@@ -13,10 +13,10 @@ import (
 	"github.com/coding-CEO/go-backend-test/utils"
 )
 
-//FIXME: I am not very happy with structure of ignoring error, but it works fine for now
+//FIXME: I am not very happy with structure of ignoring error,
+// but it will crash in the beginning if there is any error, so it works fine for now.
 var (
 	_ = godotenv.Load() //ignored err
-	
 	clientID     = os.Getenv("GOOGLE_OAUTH2_CLIENT_ID")
 	clientSecret = os.Getenv("GOOGLE_OAUTH2_CLIENT_SECRET")
 
@@ -29,10 +29,12 @@ var (
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Endpoint:     provider.Endpoint(),
-		RedirectURL:  "http://127.0.0.1:4000/auth/google/callback", //TODO: change this later
+		RedirectURL:  "http://localhost:3000/auth/google/callback", //TODO: change this later, take this from front-end
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 )
+
+// TODO: implement the challenge_code and challenge_code_methon system
 
 func GoogleGenerateUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 	state, err := utils.RandomString(16)
@@ -46,17 +48,22 @@ func GoogleGenerateUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Add("Access-Control-Allow-Origin", r.Header.Get("origin"))
+	w.Header().Add("Access-Control-Allow-Credentials","true")
+
 	utils.SetCallbackCookie(w, r, "state", state)
 	utils.SetCallbackCookie(w, r, "nonce", nonce)
-
-	http.Redirect(w, r, config.AuthCodeURL(state, oidc.Nonce(nonce)), http.StatusFound)
+	
+	w.Write([]byte(config.AuthCodeURL(state, oidc.Nonce(nonce))))
 }
 
-// TODO: complete this
 func GoogleVerifyUserOAuthCode(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", r.Header.Get("origin"))
+	w.Header().Add("Access-Control-Allow-Credentials","true")
+
 	state, err := r.Cookie("state")
 	if err != nil {
-		http.Error(w, "state not found", http.StatusBadRequest)
+		http.Error(w, "state not found in cookie", http.StatusBadRequest)
 		return
 	}
 	if r.URL.Query().Get("state") != state.Value {
@@ -82,7 +89,7 @@ func GoogleVerifyUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 
 	nonce, err := r.Cookie("nonce")
 	if err != nil {
-		http.Error(w, "nonce not found", http.StatusBadRequest)
+		http.Error(w, "nonce not found in cookie", http.StatusBadRequest)
 		return
 	}
 	if idToken.Nonce != nonce.Value {
@@ -90,7 +97,7 @@ func GoogleVerifyUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	oauth2Token.AccessToken = "*REDACTED*"
+	oauth2Token.AccessToken = "*REDACTED*" // hide the access token, because you don't need it anymore now
 
 	resp := struct {
 		OAuth2Token   *oauth2.Token
@@ -106,5 +113,6 @@ func GoogleVerifyUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	w.Write(data)
 }
