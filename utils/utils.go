@@ -21,8 +21,10 @@ func SetCallbackCookie(w http.ResponseWriter, r *http.Request, name, value strin
 		Name:     name,
 		Value:    value,
 		MaxAge:   int(time.Hour.Seconds()),
-		Secure:   r.TLS != nil,
+		Secure:   true,
 		HttpOnly: true,
+		Path: "/",
+		SameSite: http.SameSiteNoneMode,
 	}
 	http.SetCookie(w, c)
 }
