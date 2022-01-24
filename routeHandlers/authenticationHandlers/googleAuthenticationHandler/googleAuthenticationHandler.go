@@ -11,6 +11,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/coding-CEO/go-backend-test/utils"
+	"github.com/coding-CEO/go-backend-test/utils/httpUtils"
 )
 
 //FIXME: I am not very happy with structure of ignoring error,
@@ -37,6 +38,9 @@ var (
 // TODO: implement the challenge_code and challenge_code_methon system
 
 func GoogleGenerateUserOAuthCode(w http.ResponseWriter, r *http.Request) {
+	
+	httpUtils.AddAuthenticationRouteHeaders(w, r);
+
 	state, err := utils.RandomString(16)
 	if err != nil {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
@@ -48,9 +52,6 @@ func GoogleGenerateUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("Access-Control-Allow-Origin", r.Header.Get("origin"))
-	w.Header().Add("Access-Control-Allow-Credentials","true")
-
 	utils.SetCallbackCookie(w, r, "state", state)
 	utils.SetCallbackCookie(w, r, "nonce", nonce)
 	
@@ -58,8 +59,8 @@ func GoogleGenerateUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 }
 
 func GoogleVerifyUserOAuthCode(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", r.Header.Get("origin"))
-	w.Header().Add("Access-Control-Allow-Credentials","true")
+
+	httpUtils.AddAuthenticationRouteHeaders(w, r);
 
 	state, err := r.Cookie("state")
 	if err != nil {
