@@ -40,12 +40,7 @@ func GoogleGenerateUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 	
 	httpUtils.AddAuthenticationRouteHeaders(w, r)
 
-	redirectUri := r.URL.Query().Get("redirect_uri")
-	if len(redirectUri) <= 0 {
-		http.Error(w, "redirect_uri in parameters is empty", http.StatusBadRequest)
-		return
-	}
-	config.RedirectURL = redirectUri;
+	config.RedirectURL = r.URL.Query().Get("redirect_uri")
 
 	state, err := utils.RandomString(16)
 	if err != nil {

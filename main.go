@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	router := mux.NewRouter();
+	router := mux.NewRouter()
 
 	// route handlers below
 	router.HandleFunc("/", homeHandler.HomeHandler)

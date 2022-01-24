@@ -15,6 +15,6 @@ func AddValidAccessControlAllowOrigin(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddAuthenticationRouteHeaders(w http.ResponseWriter, r *http.Request) {
-	AddValidAccessControlAllowOrigin(w, r);
+	AddValidAccessControlAllowOrigin(w, r)
 	w.Header().Add("Access-Control-Allow-Credentials","true")
 }
