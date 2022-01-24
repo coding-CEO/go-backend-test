@@ -30,7 +30,6 @@ var (
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Endpoint:     provider.Endpoint(),
-		RedirectURL:  "http://localhost:3000/auth/google/callback", //TODO: change this later, take this from front-end
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 )
@@ -39,7 +38,14 @@ var (
 
 func GoogleGenerateUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 	
-	httpUtils.AddAuthenticationRouteHeaders(w, r);
+	httpUtils.AddAuthenticationRouteHeaders(w, r)
+
+	redirectUri := r.URL.Query().Get("redirect_uri")
+	if len(redirectUri) <= 0 {
+		http.Error(w, "redirect_uri in parameters is empty", http.StatusBadRequest)
+		return
+	}
+	config.RedirectURL = redirectUri;
 
 	state, err := utils.RandomString(16)
 	if err != nil {
@@ -51,7 +57,7 @@ func GoogleGenerateUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return
 	}
-
+	
 	utils.SetCallbackCookie(w, r, "state", state)
 	utils.SetCallbackCookie(w, r, "nonce", nonce)
 	
@@ -60,7 +66,7 @@ func GoogleGenerateUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 
 func GoogleVerifyUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 
-	httpUtils.AddAuthenticationRouteHeaders(w, r);
+	httpUtils.AddAuthenticationRouteHeaders(w, r)
 
 	state, err := r.Cookie("state")
 	if err != nil {
