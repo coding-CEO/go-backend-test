@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/joho/godotenv"
@@ -30,6 +31,7 @@ var (
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Endpoint:     provider.Endpoint(),
+		RedirectURL: "http://localhost:3000/auth/google/callback",
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 )
@@ -40,7 +42,7 @@ func GoogleGenerateUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 	
 	httpUtils.AddAuthenticationRouteHeaders(w, r)
 
-	config.RedirectURL = r.URL.Query().Get("redirect_uri")
+	// config.RedirectURL = r.URL.Query().Get("redirect_uri")
 
 	state, err := utils.RandomString(16)
 	if err != nil {
@@ -116,5 +118,25 @@ func GoogleVerifyUserOAuthCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	type EmailClaims struct {
+		Email         string `json:"email"`
+    	EmailVerified bool   `json:"email_verified"`
+	}
+	var emailInfo EmailClaims
+	if err := json.Unmarshal(*resp.IDTokenClaims, &emailInfo); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	cookie := &http.Cookie{
+		Name:     "token",
+		Value:    emailInfo.Email,
+		MaxAge:   int(time.Hour.Seconds() * 24 * 30),
+		Secure:   true,
+		HttpOnly: true,
+		Path: "/",
+		SameSite: http.SameSiteNoneMode,
+	}
+	http.SetCookie(w, cookie)
 	w.Write(data)
 }

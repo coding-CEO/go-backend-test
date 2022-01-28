@@ -18,7 +18,7 @@ func main() {
 	// route handlers below
 	router.HandleFunc("/", homeHandler.HomeHandler)
 	router.HandleFunc("/googleGenerateUserOAuthCode", googleAuthenticationHandler.GoogleGenerateUserOAuthCode)
-	router.HandleFunc("/auth/google/callback", googleAuthenticationHandler.GoogleVerifyUserOAuthCode)
+	router.HandleFunc("/auth/google/verifyUserOAuthCode", googleAuthenticationHandler.GoogleVerifyUserOAuthCode)
     
 	// start the server
 	fmt.Println("Server is Listening on port 4000")

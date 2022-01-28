@@ -29,11 +29,13 @@ This is my practice repo to learn about creating backend stuff & openid connect 
 This is the basic design of what I want to build. \
 Authenticate users of clients using single authentication-service-provider
 
-    Clients:        ┌>┌──>  a.com     b.in   c.org  <─────┐<┐
-                    │ │       ↓        ↓       ↓          │ │
-    This Repo:      │ └─ authentication-service-provider ─┘ │
-                    │     ↓           ↓          ↓          │
-    OAuth Servers:  └─ google.com  apple.com  facebook.com ─┘
+    Clients:            ┌────>  a.com     b.in   c.org  <───────┐
+                        │         ↓        ↓       ↓            │
+    Front-End Repo:     │ ┌───>   login/signup interface <────┐ |
+                        │ │                ↓                  │ │
+    This Repo:          │ └─ authentication-service-provider ─┘ │
+                        │     ↓            ↓          ↓         │
+    OAuth Servers:      └─ google.com  apple.com  facebook.com ─┘
 
 ## API Routes
 
